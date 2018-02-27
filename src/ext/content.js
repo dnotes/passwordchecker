@@ -1,22 +1,26 @@
 var crypto = window.crypto || window.msCrypto
-var timer
+var timer, textTimer
 var txtEl
 var alertEl = []
 var els = document.querySelectorAll('input[type="password"]')
 for (var i = 0; i < els.length; i++) {
     if (i === 0) {
         txtEl = document.documentElement.appendChild(document.createElement("passwordchecker"))
+        txtEl.addEventListener('click', function() {
+            clearTimeout(textTimer);
+            txtEl.style.zIndex = -9999;
+        })
     }
     var tmpEl = document.documentElement.appendChild(document.createElement("passwordstatus"));
     alertEl.push(tmpEl)
     els[i].passwordcheckerid = i;
-    var rect = els[i].getBoundingClientRect();
-    alertEl[i].style.top = (rect.bottom - (rect.height / 2)) + "px";
-    alertEl[i].style.left = (rect.right - 34) + "px";
     if (location.protocol === 'https:') {
         els[i].addEventListener('keyup', function(e) {
             var el = e.currentTarget;
             var i = el.passwordcheckerid;
+            var offset = getOffset(el);
+            alertEl[i].style.top = (offset.top + (el.offsetHeight / 2)) + "px";
+            alertEl[i].style.left = ((offset.left + el.offsetWidth) - 34) + "px";
             var pw = this.value
             if (pw.length < 8) {
                 alertEl[i].className = "check"
@@ -55,20 +59,19 @@ for (var i = 0; i < els.length; i++) {
                     });
                 }, 500, pw, this)
             }
+            positionTextElement(el);
         });
     } else {
         alertEl[i].className = "bad"
         txtEl.className = "bad"
         txtEl.textContent = "Don't enter passwords here! This site does not use https!"
-        txtEl.style.display = 'block';
+        txtEl.style.zIndex = 9999;
     }
     alertEl[i].addEventListener('click', function() {
-        txtEl.style.display = 'block';
+        clearTimeout(textTimer)
+        txtEl.style.zIndex = txtEl.style.zIndex * -1;
     })
 }
-txtEl.addEventListener('click', function() {
-    txtEl.style.display = 'none';
-})
 
 function checkPassword(password) {
     return new Promise(function(resolve, reject) {
@@ -102,6 +105,35 @@ function checkPassword(password) {
             reject(error);
         })
     })
+}
+
+function positionTextElement(el) {
+    var offset = getOffset(el);
+    clearTimeout(textTimer);
+    txtEl.style.left = ((offset.left + el.offsetWidth) - txtEl.offsetWidth) + "px";
+    if (true) { // TODO: allow for when the text element would appear below the screen
+        txtEl.style.top = (offset.top + el.offsetHeight + 5) + "px";
+    }
+    else {
+        txtEl.style.top = (offset.top - 71) + "px";
+    }
+    txtEl.style.zIndex = 9999;
+    textTimer = setTimeout(function() {
+        if (!txtEl.className.match(/bad/)) {
+            txtEl.style.zIndex = -9999;
+        }
+    }, 1500);
+}
+
+function getOffset(el) {
+    var _x = 0;
+    var _y = 0;
+    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+        _x += el.offsetLeft - el.scrollLeft;
+        _y += el.offsetTop - el.scrollTop;
+        el = el.offsetParent;
+    }
+    return { top: _y, left: _x };
 }
 
 function sha1(str) {
