@@ -7,45 +7,50 @@ for (var i = 0; i < els.length; i++) {
     if (i === 0) {
         txtEl = document.documentElement.appendChild(document.createElement("passwordchecker"))
     }
-    var tmpEl = els[i].parentNode.insertBefore(document.createElement("passwordstatus"), els[i]);
+    var tmpEl = document.documentElement.appendChild(document.createElement("passwordstatus"));
     alertEl.push(tmpEl)
     els[i].passwordcheckerid = i;
+    var rect = els[i].getBoundingClientRect();
+    alertEl[i].style.top = (rect.bottom - (rect.height / 2)) + "px";
+    alertEl[i].style.left = (rect.right - 34) + "px";
     if (location.protocol === 'https:') {
         els[i].addEventListener('keyup', function(e) {
-            var i = e.currentTarget.passwordcheckerid;
+            var el = e.currentTarget;
+            var i = el.passwordcheckerid;
             var pw = this.value
             if (pw.length < 8) {
+                alertEl[i].className = "check"
                 txtEl.className = ""
-                alertEl[i].className = ""
-                txtEl.textContent = "Password checking begins at 8 characters"
+                txtEl.textContent = "Passwords should be at least 8 characters."
             } else {
+                alertEl[i].className = "check"
                 txtEl.className = ""
-                alertEl[i].className = ""
                 txtEl.textContent = "Checking..."
                 clearTimeout(timer)
                 timer = setTimeout(function(pw, el) {
                     checkPassword(pw).then(function(countBreaches) {
                         if (el.value == pw) {
                             if (countBreaches === 0) {
-                                txtEl.className = 'good';
                                 alertEl[i].className = 'good'
+                                txtEl.className = 'good';
                                 txtEl.innerHTML = "This password was not found in past breaches."
                             } else if (!isNaN(countBreaches)) {
+                                alertEl[i].className = 'pwned'
                                 txtEl.className = 'bad'
-                                alertEl[i].className = 'bad'
                                 txtEl.innerHTML = "This password has been exposed " + countBreaches + " time(s)."
                             } else {
-                                txtEl.className = ''
-                                alertEl[i].className = ''
-                                txtEl.textContent = "Unexpected result returned."
+                                alertEl[i].className = 'err'
+                                txtEl.className = 'bad'
+                                txtEl.textContent = "Error. Password could not be checked."
                             }
                         }
                     }, function(error) {
-                        var text = "Sorry, there was an error! " + error;
+                        var text = "Error. Password could not be checked.";
                         if (!isNaN(error) && error > 0) {
                             text += " Code: " + error;
                         }
-                        txtEl.className = ""
+                        alertEl[i].className = "err"
+                        txtEl.className = "bad"
                         txtEl.textContent = text
                     });
                 }, 500, pw, this)
@@ -53,6 +58,7 @@ for (var i = 0; i < els.length; i++) {
         });
     } else {
         alertEl[i].className = "bad"
+        txtEl.className = "bad"
         txtEl.textContent = "Don't enter passwords here! This site does not use https!"
         txtEl.style.display = 'block';
     }
