@@ -1,0 +1,23 @@
+{
+  "name": "passwordchecker",
+  "version": "0.1.0",
+  "description": "Browser extension to check passwords entered into websites against those exposed in previous breaches using pwnedpasswords API.",
+  "main": "content.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/dnotes/passwordchecker"
+  },
+  "keywords": [
+    "haveibeenpwned",
+    "pwnedpasswords",
+    "passwords",
+    "security"
+  ],
+  "author": "David Hunt",
+  "license": "MIT"
+}
