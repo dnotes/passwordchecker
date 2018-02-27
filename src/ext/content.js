@@ -41,7 +41,7 @@ for (var i = 0; i < els.length; i++) {
                             } else if (!isNaN(countBreaches)) {
                                 alertEl[i].className = 'pwned'
                                 txtEl.className = 'bad'
-                                txtEl.innerHTML = "This password has been exposed " + countBreaches + " time(s)."
+                                txtEl.innerHTML = "This password has been exposed <b>" + countBreaches + "</b> time(s)."
                             } else {
                                 alertEl[i].className = 'err'
                                 txtEl.className = 'bad'
