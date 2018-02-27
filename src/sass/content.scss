@@ -1,0 +1,49 @@
+passwordchecker {
+  border-radius: 9px;
+  background: white inline-image("pwnedgrey.png") center center no-repeat;
+  box-shadow: 1px 1px 8px rgba(0,0,0,.3);
+  font: 14px bold Arial, sans-serif;
+  text-shadow: 1px 1px 2px white, -1px -1px 2px white;
+  line-height: 1.2em;
+  color: gray;
+  padding: 26px 32px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width: 80%;
+  max-width: 280px;
+  z-index: 9999;
+  display: none;
+  text-align: center;
+  &.good {
+    color: green;
+  }
+  &.bad {
+    color: red;
+  }
+}
+passwordstatus {
+  height: 34px;
+  width: 48px;
+  background: transparent left center no-repeat;
+  position: absolute;
+  display: block;
+  transform: translatey(-50%);
+  z-index: 9999;
+  &.check {
+    background-image: inline-image("question.png");
+  }
+  &.warn {
+    background-image: inline-image("warn.png");
+  }
+  &.err {
+    background-image: inline-image("err.png");
+  }
+  &.pwned {
+    background-image: inline-image("pwned.png");
+  }
+  &.good {
+    background-image: inline-image("good.png");
+  }
+}
