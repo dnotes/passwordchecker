@@ -32,7 +32,7 @@ for (var i = 0; i < els.length; i++) {
         txtEl.textContent = "Checking...";
         clearTimeout(timer);
         timer = setTimeout(function(pw, el) {
-          checkPassword(pw).then(function(countBreaches) {
+          browser.runtime.sendMessage(pw).then(function(countBreaches) {
             if (el.value == pw) {
               if (countBreaches === 0) {
                 alertEl[i].className = 'good';
@@ -48,7 +48,7 @@ for (var i = 0; i < els.length; i++) {
                 txtEl.textContent = "Error. Password could not be checked."
               }
             }
-          }, function(error) {
+          }).catch(function(error) {
             var text = "Error. Password could not be checked.";
             if (!isNaN(error) && error > 0) {
               text += " Code: " + error;
@@ -70,40 +70,6 @@ for (var i = 0; i < els.length; i++) {
   alertEl[i].addEventListener('click', function() {
     clearTimeout(textTimer);
     txtEl.style.zIndex = txtEl.style.zIndex * -1;
-  })
-}
-
-function checkPassword(password) {
-  return new Promise(function(resolve, reject) {
-    if (password.length < 6) {
-      // Passwords shorter than 6 characters are not checked because it might compromise anonymity
-      // if the input is not debounced correctly.
-      reject(Error("Password too short."))
-    }
-    sha1(password).then(function(hash) {
-      var sendhash = hash.substr(0, 5);
-      var checkhash = new RegExp(hash.substr(5) + ':(\\d+)', 'i');
-      var req = new XMLHttpRequest();
-      req.open('GET', 'https://api.pwnedpasswords.com/range/' + sendhash);
-      req.onload = function() {
-        if (req.status >= 200 && req.status < 400) {
-          if (!req.responseText.match(/^[0-9a-fA-F]{35}:/)) {
-            reject(Error(req.responseText))
-          }
-          var found = req.responseText.match(checkhash);
-          var count = found ? found[1] : 0;
-          resolve(count)
-        } else {
-          reject(Error(req.status))
-        }
-      };
-      req.onerror = function() {
-        reject(Error('Network error'))
-      };
-      req.send()
-    }, function(error) {
-      reject(error);
-    })
   })
 }
 
@@ -134,28 +100,4 @@ function getOffset(el) {
     el = el.offsetParent;
   }
   return { top: _y, left: _x };
-}
-
-function sha1(str) {
-  var buffer = new TextEncoder('utf-8').encode(str); // encode as UTF-8
-  return crypto.subtle.digest('SHA-1', buffer).then(function(hash) {
-    return hex(hash)
-  });
-}
-
-function hex(buffer) {
-  var hexCodes = [];
-  var view = new DataView(buffer);
-  for (var i = 0; i < view.byteLength; i += 4) {
-    // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
-    var value = view.getUint32(i);
-    // toString(16) will give the hex representation of the number without padding
-    var stringValue = value.toString(16);
-    // We use concatenation and slice for padding
-    var padding = '00000000';
-    var paddedValue = (padding + stringValue).slice(-padding.length);
-    hexCodes.push(paddedValue);
-  }
-  // Join all the hex strings into one
-  return hexCodes.join("")
 }
