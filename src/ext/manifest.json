@@ -5,6 +5,7 @@
   "version": "1.0",
   "author": "David Hunt",
   "icons": {
+    "128": "icons/pwned128.png",
     "96": "icons/pwned96.png",
     "48": "icons/pwned48.png",
     "32": "icons/pwned32.png"
