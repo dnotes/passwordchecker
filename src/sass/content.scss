@@ -11,6 +11,7 @@ passwordchecker {
   width: 280px;
   max-width: 80%;
   z-index: -9999;
+  opacity: 0.01;
   text-align: center;
   box-sizing: border-box;
   &.good {
@@ -28,6 +29,7 @@ passwordstatus {
   display: block;
   transform: translatey(-50%);
   z-index: 9999;
+  cursor: pointer;
   &.check {
     background-image: inline-image("question.png");
   }

@@ -2,13 +2,14 @@ var crypto = window.crypto || window.msCrypto;
 var timer, textTimer;
 var txtEl;
 var alertEl = [];
+var status = "";
 var els = document.querySelectorAll('input[type="password"]');
 for (var i = 0; i < els.length; i++) {
   if (i === 0) {
     txtEl = document.documentElement.appendChild(document.createElement("passwordchecker"));
     txtEl.addEventListener('click', function() {
       clearTimeout(textTimer);
-      txtEl.style.zIndex = -9999;
+      hideTextElement();
     })
   }
   var tmpEl = document.documentElement.appendChild(document.createElement("passwordstatus"));
@@ -23,53 +24,51 @@ for (var i = 0; i < els.length; i++) {
       alertEl[i].style.left = ((offset.left + el.offsetWidth) - 34) + "px";
       var pw = this.value;
       if (pw.length < 8) {
-        alertEl[i].className = "check";
-        txtEl.className = "";
+        status = alertEl[i].className = txtEl.className = "check";
         txtEl.textContent = "Passwords should be at least 8 characters."
+        positionTextElement(el);
       } else {
-        alertEl[i].className = "check";
-        txtEl.className = "";
+        status = alertEl[i].className = txtEl.className = "check";
         txtEl.textContent = "Checking...";
         clearTimeout(timer);
         timer = setTimeout(function(pw, el) {
           browser.runtime.sendMessage(pw).then(function(countBreaches) {
             if (el.value == pw) {
               if (countBreaches === 0) {
-                alertEl[i].className = 'good';
-                txtEl.className = 'good';
+                status = alertEl[i].className = txtEl.className = "good";
                 txtEl.innerHTML = "This password was not found in past breaches."
               } else if (!isNaN(countBreaches)) {
                 alertEl[i].className = 'pwned';
-                txtEl.className = 'bad';
+                status = txtEl.className = 'bad';
                 txtEl.innerHTML = "This password has been exposed <b>" + countBreaches + "</b> time(s)."
               } else {
                 alertEl[i].className = 'err';
-                txtEl.className = 'bad';
+                status = txtEl.className = 'bad';
                 txtEl.textContent = "Error. Password could not be checked."
               }
             }
+            positionTextElement(el);
           }).catch(function(error) {
             var text = "Error. Password could not be checked.";
             if (!isNaN(error) && error > 0) {
               text += " Code: " + error;
             }
             alertEl[i].className = "err";
-            txtEl.className = "bad";
+            status = txtEl.className = "bad";
             txtEl.textContent = text
+            positionTextElement(el);
           });
         }, 500, pw, this)
       }
-      positionTextElement(el);
     });
   } else {
-    alertEl[i].className = "bad";
-    txtEl.className = "bad";
+    status = alertEl[i].className = txtEl.className = "bad";
     txtEl.textContent = "Don't enter passwords here! This site does not use https!";
-    txtEl.style.zIndex = 9999;
+    showTextElement();
   }
   alertEl[i].addEventListener('click', function() {
     clearTimeout(textTimer);
-    txtEl.style.zIndex = txtEl.style.zIndex * -1;
+    toggleTextElement();
   })
 }
 
@@ -83,12 +82,27 @@ function positionTextElement(el) {
   else {
     txtEl.style.top = (offset.top - 71) + "px";
   }
-  txtEl.style.zIndex = 9999;
   textTimer = setTimeout(function() {
-    if (!txtEl.className.match(/bad/)) {
-      txtEl.style.zIndex = -9999;
+    if (status === "good") {
+      hideTextElement();
     }
-  }, 1500);
+  }, 2400);
+  showTextElement();
+}
+
+function toggleTextElement() {
+  txtEl.style.zIndex = txtEl.style.zIndex * -1;
+  txtEl.style.opacity = (txtEl.style.zIndex < 0 ? 0.01 : 1);
+}
+
+function showTextElement() {
+  txtEl.style.zIndex = 9999;
+  txtEl.style.opacity = 1;
+}
+
+function hideTextElement() {
+  txtEl.style.opacity = 0.01;
+  txtEl.style.zIndex = -9999;
 }
 
 function getOffset(el) {
