@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Password Checker",
   "description": "Whenever you enter a password on any web page, this extension will notify you if it has been exposed in previous data breaches. The extension uses the pwnedpasswords API (v2). Your password is never exposed, either in full or in part, over the internet.",
-  "version": "0.1",
+  "version": "1.0",
   "author": "David Hunt",
   "icons": {
     "96": "icons/pwned96.png",
